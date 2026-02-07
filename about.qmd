@@ -1,25 +1,5 @@
 ---
-title: "Tanya Yeung "
-about:
-  template: jolla
-  image: tyeung.jpg
-  links:
-    - icon: linkedin
-      text: LinkedIn
-      href: https://www.linkedin.com/in/tanya-yeung-785572281/
-    - icon: github
-      text: Github
-      href: https://github.com/tyeunghc05
+title: "About Me"
 ---
-Tanya Yeung is a 3rd year Marine Science student major, Business minor student in California State University, Monterey Bay. 
 
-## Education 
-
-CSUMB 2023-Present 
-San Domenico High School 2019-2023
-
-## Experience 
-
-Advize Production Intern | 2025-Present 
-
-HKCIN | Summer Intern | 2022
+Tanya Yeung is a student with a strong interest in marine science, focusing on understanding how organisms interact with their environments. Her academic work emphasizes observational and experimental approaches in ecology, data analysis, and science communication. Through coursework, independent projects, and field-related experiences, she has developed skills in critical thinking, research design, and translating scientific findings for broader audiences.
