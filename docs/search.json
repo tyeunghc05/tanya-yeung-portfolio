@@ -236,5 +236,54 @@
     "title": "Right whale sightings project",
     "section": "Relationship between mother-calf sightings and group size",
     "text": "Relationship between mother-calf sightings and group size\n Figure 6. Scatterplot showing the relationship between whale mother-calf sightings and group size."
+  },
+  {
+    "objectID": "right_whale_study.html",
+    "href": "right_whale_study.html",
+    "title": "Right whale sightings project",
+    "section": "",
+    "text": "In this example project, I have taken the dataset “Right Whale Sightings Advisory System (RWSAS), from NOAA. This fishery program was designed to reduce ship collisions with critically endangered North Atlantic right whales. This dataset includes information on Whale ID, sighting date, group size, latitude, longitude, certainty on sighting, category of sighting, presence of whale mom and calf, and duplicates in the dataset."
+  },
+  {
+    "objectID": "right_whale_study.html#number-of-whale-sighting-at-different-observation-platforms-1",
+    "href": "right_whale_study.html#number-of-whale-sighting-at-different-observation-platforms-1",
+    "title": "Right whale sightings project",
+    "section": "Number of whale sighting at different observation platforms",
+    "text": "Number of whale sighting at different observation platforms\n Figure 1. Bar graph shows the amount of right whale sightings at different sighting types."
+  },
+  {
+    "objectID": "right_whale_study.html#number-of-whale-sighting-in-each-area-1",
+    "href": "right_whale_study.html#number-of-whale-sighting-in-each-area-1",
+    "title": "Right whale sightings project",
+    "section": "Number of whale sighting in each area",
+    "text": "Number of whale sighting in each area\n Figure 2. Bar graph showing the number of right whale sightings in different areas, categorized by North (pink), Mid (green), and South (blue), based on the area."
+  },
+  {
+    "objectID": "right_whale_study.html#group-size-across-sighting-types-1",
+    "href": "right_whale_study.html#group-size-across-sighting-types-1",
+    "title": "Right whale sightings project",
+    "section": "Group size across sighting types",
+    "text": "Group size across sighting types\n Figure 3. Boxplot showing the whale group size seen at different sighting types."
+  },
+  {
+    "objectID": "right_whale_study.html#whale-mom-and-calf-sightings-1",
+    "href": "right_whale_study.html#whale-mom-and-calf-sightings-1",
+    "title": "Right whale sightings project",
+    "section": "Whale mom and calf sightings",
+    "text": "Whale mom and calf sightings\n Figure 4. Bargraph showing right whale mom and calf sightings throughout different seasons at different areas, categorized as North (pink), Mid (green), and South (blue)."
+  },
+  {
+    "objectID": "right_whale_study.html#relationship-between-mother-calf-sightings-and-group-size-1",
+    "href": "right_whale_study.html#relationship-between-mother-calf-sightings-and-group-size-1",
+    "title": "Right whale sightings project",
+    "section": "Relationship between mother-calf sightings and group size",
+    "text": "Relationship between mother-calf sightings and group size\n Figure 5. Boxplot showing the number of sightings of whale mom and calf across all seasons."
+  },
+  {
+    "objectID": "right_whale_study.html#relationship-between-mother-calf-sightings-and-group-size-2",
+    "href": "right_whale_study.html#relationship-between-mother-calf-sightings-and-group-size-2",
+    "title": "Right whale sightings project",
+    "section": "Relationship between mother-calf sightings and group size",
+    "text": "Relationship between mother-calf sightings and group size\n Figure 6. Scatterplot showing the relationship between whale mother-calf sightings and group size."
   }
 ]
