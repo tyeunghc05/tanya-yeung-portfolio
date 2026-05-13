@@ -10,7 +10,7 @@ website:
         text: "Home"
       - href: about.qmd
         text: "About Me"
-      - href: Untitled.qmd
+      - href: right_whale_study.qmd
         text: "Example project"
 
 format:
