@@ -1,0 +1,63 @@
+---
+title: "Portfolio_RW"
+author: "Tanya Yeung"
+date: "2026-03-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data Description
+1. Identify your data source.
+>The dataset "Right Whale Sightings Advisory System (RWSAS)", Catalog Item ID 23305, is a NOAA Fisheries program designed to reduce ship collisions with critically endangered North Atlantic right whales.
+
+2. Describe your data, including variables and data types.
+> This dataset included information on, ID, sighting date, group size, latitiude, longtitude, certainty, category, presence of mom calf, and duplicates. 
+
+3. Identify the research questions you want to answer.
+> RQ: Where are the North Atlantic Right Whales most frequently seen and does group size vary across sighting types?
+
+# Data Visualization
+1. What do you want your final visualizations to look like?
+> For the final visualization, I would like to have a boxplot that shows where the North Atlantic Right Whales are most frequently seen, by grouping the lattitude and longtitudes into different groups, and then another boxplot to see the variation of group sizes different varied from different sighting types.
+
+2. What do you want to highlight on your final visualizations in order to answer your research questions? How do you plan to do that?
+>Something I want to highlight on my final visualization is to which area has the most sighting of Right Whales, which will help answer a part of the research question, and which sighting types can are shown to be able to observe the biggest group size. 
+
+3. What is missing from your data or would need to change in your data to create these visualizations?
+>I need to group the lat and long into different groups/areas, in order to create different areas for us to differientiate. 
+
+# Data Cleaning
+The answer to at least three of these questions should be “YES” for the data to meet the necessary standards to demonstrate your cleaning. Your data source should not be an already perfectly prepared data set.
+
+1. Do you need to reformat any variables into different types (e.g. factors, time, dates, strings)? Or remove information from variable values?
+> Yes, I will remove duplicate and mom_calf off the dataset I will be working with 
+
+2. Do you need to deal with any missing data, especially missing data coded other than NA?
+> Yes and no..? There is a lot of missing data for duplicate, I have to either put them as NA or to filter it out the data
+
+3. Do you need to filter your data? How?
+> Yes, I might need to filter out the duplicate and the mother calf column since I do not need those data for the research question I came up with
+
+4. Do you need to create any new variables? What variables? How?
+> Yes, I will create new variables in order to group the latitude and longtitudes into different areas
+
+5. Do you need to add new data (join) to your data? What data? How?
+> No
+
+6. Do you need pivot your data in any way? Why? How?
+> Yes, I will need to pivot my data for the group size with the category (sighting types)
+
+7. Do you need to summarize any of the variables? Which ones? How?
+> Yes, I will find the mean of each "area" that I create to better visluaize on a line plot/scatterplot
+
+8. What other aspects of your data need to be “fixed” in order to make your data visualizations?
+> Not I can think of in the moment.
+
+
+Most will answer yes to the following for making your programming more efficient using select(), but you should have three other yeses above.
+
+9. Are there any variables you can exclude from your data?
+> mom_calf and duplicate and certainty 
