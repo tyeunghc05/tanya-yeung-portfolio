@@ -1,0 +1,240 @@
+[
+  {
+    "objectID": "right_whale_code_UPDATED.html",
+    "href": "right_whale_code_UPDATED.html",
+    "title": "right_whale_code",
+    "section": "",
+    "text": "In this example project, I have taken the dataset “Right Whale Sightings Advisory System (RWSAS), from NOAA. This fishery program was designed to reduce ship collisions with critically endangered North Atlantic right whales. This dataset includes information on Whale ID, sighting date, group size, latitude, longitude, certainty on sighting, category of sighting, presence of whale mom and calf, and duplicates in the dataset.\nWith this dataset, I developed my research question: Where are the North Atlantic Right Whales most frequently seen, and does group size vary across sighting types?\nNumber of whale sighting at different observation platforms Dedicated research vessels, especially aerial surveys, appears to be the most effective method for detecting whales. This might be the reason as they cover large areas efficiently. It is shown that survey efforts and platform types influence sighting frequency (Figure 1).\nNumber of whale sighting in each area By dividing the latitude and longititude by North, Mid, and South. Whale sightings are seen to be more significant in the North. (Figure 2)\nGroup size across sighting types Small whale groups are the most commonly observed throughout all observing platforms, generally 1-3 whales per group. Aerial surveys tend to detect larger aggregations of whale groups as they have the ability to scan bigger areas from a birds eye view. On the other hand, observation platforms such as Dedicated Egg Shipboard and US Coast Guard sighting show a larger variability and wider ranges in group size (Figure 3). After running an ANOVA and Tukey test, the Tukey post-hoc tests showed that group size differed significantly between several sighting category, espescially between opportunistic sightings and dedicated survery categories (p &lt; 0.05).\nWhale mom and calf sightings With whale mom and calf sightings within the groups, there is a seasonal shift in where wightings are most concentrated, where in the North, mom and calf sightings peaks in spring, and in the South it peaks during Winter. Between North and South (categorized as Mid in this study), whale mom and calf sighting remains low throughout (Figure 4). Overall, Spring season is shown to have the most whale mom and calf sightings (Figure 5).\nRelationship between mother-calf sightings and group size Mother-calf pairs are most commonly observed in small groups, or in isolated pairs, rather than in bigger groups sizes. This may reflect whale behavior, where mothers with calves avoid larger grouch to reduce competition and stress (Figure 6).\n\n\n\nlibrary(tidyverse)\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.1.4     ✔ readr     2.1.5\n✔ forcats   1.0.1     ✔ stringr   1.5.1\n✔ ggplot2   3.5.2     ✔ tibble    3.2.1\n✔ lubridate 1.9.4     ✔ tidyr     1.3.1\n✔ purrr     1.0.4     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nlibrary(lubridate)\n\nwhales &lt;- read.csv(\"~/Desktop/CSUMB/25-26/Spring 26/Stats 210 /Labs/Lab 2/tanya-yeung-portfolio/23305_RWSAS.csv\")\n\n\n\n\n\nwhales_clean &lt;- whales |&gt; \n  select(-DUPLICATE, -MOM_CALF) |&gt; \n  mutate(sighting = dmy(SIGHTINGDATE),\n         certainty = as.factor(CERTAINTY),\n         category = as.factor(CATEGORY)) |&gt; \n  select(-SIGHTINGDATE, -CERTAINTY, -CATEGORY) |&gt; \n  drop_na() |&gt; \n   arrange(sighting) |&gt; \n  filter(certainty == \"Definite\") |&gt; \n  mutate(\n    area = case_when(\n      LAT &gt; 40 ~ \"North\",\n      LAT &gt; 35 ~ \"Mid\",\n      TRUE ~ \"South\")) |&gt; \n  filter(!category == \"Unknown\")\n\n\n\n\n\npivot_whale &lt;- whales_clean |&gt; \n  group_by(category) |&gt; \n  summarise(mean_group = mean(GROUPSIZE, na.rm = TRUE),\n            count = n())\n\nggplot(pivot_whale, aes(reorder(category, count), count))+\n  geom_col()+\n  coord_flip()+\n  scale_y_log10()+\n  labs(\n    title = \"Number of whale sightings at different sighting types\",\n    y = \"Whale sighting numbers\",\n    x = \"Sighting types\"\n  )+ \n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 1. Bar graph shows the amount of right whale sightings at different sighting types.\n\n\n\n\ndesired_order &lt;- c(\"North\", \"Mid\", \"South\")\nwhales_clean$area &lt;- factor(whales_clean$area, levels = desired_order)\n\narea_counts &lt;- whales_clean |&gt; \n  group_by(area) |&gt; \n  summarise(count = n())\n\nggplot(area_counts, aes(area, count, fill = area))+\n  geom_col()+\n  scale_y_log10()+\n  labs(\n    title = \"Right Whale sighting by area\",\n    x = \"Area\",\n    y = \"Number of sightings\"\n  )+\n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 2. Bar graph showing the number of right whale sightings in different areas, categorized by North (pink), Mid (green), and South (blue), based on the area.\n\n\n\n\nggplot(whales_clean, aes(x = reorder(category, -GROUPSIZE), y = GROUPSIZE))+\n  geom_boxplot()+\n  coord_flip()+\n  scale_y_log10()+\n  labs(\n    title = \"Group sizes across sighting types\",\n    x = \"Sighting type\",\n    y = \"Whale group size\"\n  ) +\n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 3. Boxplot showing the whale group size seen at different sighting types.\n\n\n\n\n\n               Df Sum Sq Mean Sq F value Pr(&gt;F)    \ncategory        7   7293  1041.9   36.49 &lt;2e-16 ***\nResiduals   12446 355314    28.5                   \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\n\n\n\n\n\nmom_baby &lt;- whales |&gt; \n  select(-DUPLICATE, -CATEGORY) |&gt; \n  mutate(\n    SIGHTINGDATE = dmy(SIGHTINGDATE),\n    month = month(SIGHTINGDATE, label = TRUE),\n    season = case_when(\n      month %in% c(\"Mar\",\"Apr\",\"May\") ~ \"spring\",\n      month %in% c(\"Jun\", \"Jul\", \"Aug\") ~ \"summer\",\n      month %in% c(\"Sep\", \"Oct\", \"Nov\") ~ \"fall\",\n      month %in%  c(\"Dec\", \"Jan\", \"Feb\") ~ \"winter\"\n  )) |&gt; \n  mutate(\n    area = case_when(\n      LAT &gt; 40 ~ \"North\",\n      LAT &gt; 35 ~ \"Mid\",\n      TRUE ~ \"South\"\n    )\n  )\n\n\nbaby_area_count &lt;- mom_baby |&gt; \n  count(area, season)\n\n\n\n\n\ndesired_order &lt;- c(\"North\", \"Mid\", \"South\")\nbaby_area_count$area &lt;- factor(baby_area_count$area, levels = desired_order)\n\n\nggplot(baby_area_count, aes(season, n, fill = area))+\n  geom_col(position = \"dodge\")+\n  scale_y_log10()+\n  labs(\n    title = \"Whale mom and calf sighting in different areas\",\n    x = \"Season\",\n    y = \"Number of Sightings\"\n  )+\n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 4. Bargraph showing right whale mom and calf sightings throughout different seasons at different areas, categorized as North (pink), Mid (green), and South (blue).\n\n\n\n\nggplot(baby_area_count, aes(season, n, fill = season))+\n  geom_boxplot() + \n  scale_y_log10()+\n  labs(\n    title = \"Number of right whale mom and calfs sighted in different seasons\",\n    x = \"Season\",\n    y = \"Whale sightings (mom and calf)\"\n  ) +\n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 5. Boxplot showing the number of sightings of whale mom and calf across all seasons.\n\n\n\n\ngroup_baby &lt;- mom_baby |&gt; \n  count(MOM_CALF, GROUPSIZE) |&gt; \n  rename(count = n) |&gt; \n  filter(!count == 1967)\n\nggplot(group_baby, aes(GROUPSIZE, count))+\n  geom_point()+\n  geom_smooth(method = \"glm\", method.args = list(family = \"poisson\"))+\n  scale_x_log10()+\n  theme_bw()\n\n`geom_smooth()` using formula = 'y ~ x'\n\n\nWarning: Removed 1 row containing non-finite outside the scale range\n(`stat_smooth()`).\n\n\nWarning: Removed 1 row containing missing values or values outside the scale range\n(`geom_point()`).\n\n\n\n\n\n\n\n\n\nFigure 6. Scatterplot showing the relationship between whale mother-calf sightings and group size."
+  },
+  {
+    "objectID": "right_whale_code_UPDATED.html#loading-in-library-and-csv",
+    "href": "right_whale_code_UPDATED.html#loading-in-library-and-csv",
+    "title": "right_whale_code",
+    "section": "",
+    "text": "library(tidyverse)\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.1.4     ✔ readr     2.1.5\n✔ forcats   1.0.1     ✔ stringr   1.5.1\n✔ ggplot2   3.5.2     ✔ tibble    3.2.1\n✔ lubridate 1.9.4     ✔ tidyr     1.3.1\n✔ purrr     1.0.4     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nlibrary(lubridate)\n\nwhales &lt;- read.csv(\"~/Desktop/CSUMB/25-26/Spring 26/Stats 210 /Labs/Lab 2/tanya-yeung-portfolio/23305_RWSAS.csv\")"
+  },
+  {
+    "objectID": "right_whale_code_UPDATED.html#data-cleaning",
+    "href": "right_whale_code_UPDATED.html#data-cleaning",
+    "title": "right_whale_code",
+    "section": "",
+    "text": "whales_clean &lt;- whales |&gt; \n  select(-DUPLICATE, -MOM_CALF) |&gt; \n  mutate(sighting = dmy(SIGHTINGDATE),\n         certainty = as.factor(CERTAINTY),\n         category = as.factor(CATEGORY)) |&gt; \n  select(-SIGHTINGDATE, -CERTAINTY, -CATEGORY) |&gt; \n  drop_na() |&gt; \n   arrange(sighting) |&gt; \n  filter(certainty == \"Definite\") |&gt; \n  mutate(\n    area = case_when(\n      LAT &gt; 40 ~ \"North\",\n      LAT &gt; 35 ~ \"Mid\",\n      TRUE ~ \"South\")) |&gt; \n  filter(!category == \"Unknown\")"
+  },
+  {
+    "objectID": "right_whale_code_UPDATED.html#pivoting-and-summarising-data",
+    "href": "right_whale_code_UPDATED.html#pivoting-and-summarising-data",
+    "title": "right_whale_code",
+    "section": "",
+    "text": "pivot_whale &lt;- whales_clean |&gt; \n  group_by(category) |&gt; \n  summarise(mean_group = mean(GROUPSIZE, na.rm = TRUE),\n            count = n())\n\nggplot(pivot_whale, aes(reorder(category, count), count))+\n  geom_col()+\n  coord_flip()+\n  scale_y_log10()+\n  labs(\n    title = \"Number of whale sightings at different sighting types\",\n    y = \"Whale sighting numbers\",\n    x = \"Sighting types\"\n  )+ \n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 1. Bar graph shows the amount of right whale sightings at different sighting types."
+  },
+  {
+    "objectID": "right_whale_code_UPDATED.html#right-whale-sighting-by-area-graph",
+    "href": "right_whale_code_UPDATED.html#right-whale-sighting-by-area-graph",
+    "title": "right_whale_code",
+    "section": "",
+    "text": "desired_order &lt;- c(\"North\", \"Mid\", \"South\")\nwhales_clean$area &lt;- factor(whales_clean$area, levels = desired_order)\n\narea_counts &lt;- whales_clean |&gt; \n  group_by(area) |&gt; \n  summarise(count = n())\n\nggplot(area_counts, aes(area, count, fill = area))+\n  geom_col()+\n  scale_y_log10()+\n  labs(\n    title = \"Right Whale sighting by area\",\n    x = \"Area\",\n    y = \"Number of sightings\"\n  )+\n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 2. Bar graph showing the number of right whale sightings in different areas, categorized by North (pink), Mid (green), and South (blue), based on the area."
+  },
+  {
+    "objectID": "right_whale_code_UPDATED.html#group-size-and-sighting-platform-graph",
+    "href": "right_whale_code_UPDATED.html#group-size-and-sighting-platform-graph",
+    "title": "right_whale_code",
+    "section": "",
+    "text": "ggplot(whales_clean, aes(x = reorder(category, -GROUPSIZE), y = GROUPSIZE))+\n  geom_boxplot()+\n  coord_flip()+\n  scale_y_log10()+\n  labs(\n    title = \"Group sizes across sighting types\",\n    x = \"Sighting type\",\n    y = \"Whale group size\"\n  ) +\n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 3. Boxplot showing the whale group size seen at different sighting types."
+  },
+  {
+    "objectID": "right_whale_code_UPDATED.html#statistical-testing",
+    "href": "right_whale_code_UPDATED.html#statistical-testing",
+    "title": "right_whale_code",
+    "section": "",
+    "text": "Df Sum Sq Mean Sq F value Pr(&gt;F)    \ncategory        7   7293  1041.9   36.49 &lt;2e-16 ***\nResiduals   12446 355314    28.5                   \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1"
+  },
+  {
+    "objectID": "right_whale_code_UPDATED.html#data-cleaning-for-mom-and-calf-sighting",
+    "href": "right_whale_code_UPDATED.html#data-cleaning-for-mom-and-calf-sighting",
+    "title": "right_whale_code",
+    "section": "",
+    "text": "mom_baby &lt;- whales |&gt; \n  select(-DUPLICATE, -CATEGORY) |&gt; \n  mutate(\n    SIGHTINGDATE = dmy(SIGHTINGDATE),\n    month = month(SIGHTINGDATE, label = TRUE),\n    season = case_when(\n      month %in% c(\"Mar\",\"Apr\",\"May\") ~ \"spring\",\n      month %in% c(\"Jun\", \"Jul\", \"Aug\") ~ \"summer\",\n      month %in% c(\"Sep\", \"Oct\", \"Nov\") ~ \"fall\",\n      month %in%  c(\"Dec\", \"Jan\", \"Feb\") ~ \"winter\"\n  )) |&gt; \n  mutate(\n    area = case_when(\n      LAT &gt; 40 ~ \"North\",\n      LAT &gt; 35 ~ \"Mid\",\n      TRUE ~ \"South\"\n    )\n  )\n\n\nbaby_area_count &lt;- mom_baby |&gt; \n  count(area, season)"
+  },
+  {
+    "objectID": "right_whale_code_UPDATED.html#mom-and-calf-sighting-graph",
+    "href": "right_whale_code_UPDATED.html#mom-and-calf-sighting-graph",
+    "title": "right_whale_code",
+    "section": "",
+    "text": "desired_order &lt;- c(\"North\", \"Mid\", \"South\")\nbaby_area_count$area &lt;- factor(baby_area_count$area, levels = desired_order)\n\n\nggplot(baby_area_count, aes(season, n, fill = area))+\n  geom_col(position = \"dodge\")+\n  scale_y_log10()+\n  labs(\n    title = \"Whale mom and calf sighting in different areas\",\n    x = \"Season\",\n    y = \"Number of Sightings\"\n  )+\n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 4. Bargraph showing right whale mom and calf sightings throughout different seasons at different areas, categorized as North (pink), Mid (green), and South (blue)."
+  },
+  {
+    "objectID": "right_whale_code_UPDATED.html#mom-and-calf-sighting-graph-by-season-and-area",
+    "href": "right_whale_code_UPDATED.html#mom-and-calf-sighting-graph-by-season-and-area",
+    "title": "right_whale_code",
+    "section": "",
+    "text": "ggplot(baby_area_count, aes(season, n, fill = season))+\n  geom_boxplot() + \n  scale_y_log10()+\n  labs(\n    title = \"Number of right whale mom and calfs sighted in different seasons\",\n    x = \"Season\",\n    y = \"Whale sightings (mom and calf)\"\n  ) +\n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 5. Boxplot showing the number of sightings of whale mom and calf across all seasons."
+  },
+  {
+    "objectID": "right_whale_code_UPDATED.html#relationship-between-calf-and-group-size",
+    "href": "right_whale_code_UPDATED.html#relationship-between-calf-and-group-size",
+    "title": "right_whale_code",
+    "section": "",
+    "text": "group_baby &lt;- mom_baby |&gt; \n  count(MOM_CALF, GROUPSIZE) |&gt; \n  rename(count = n) |&gt; \n  filter(!count == 1967)\n\nggplot(group_baby, aes(GROUPSIZE, count))+\n  geom_point()+\n  geom_smooth(method = \"glm\", method.args = list(family = \"poisson\"))+\n  scale_x_log10()+\n  theme_bw()\n\n`geom_smooth()` using formula = 'y ~ x'\n\n\nWarning: Removed 1 row containing non-finite outside the scale range\n(`stat_smooth()`).\n\n\nWarning: Removed 1 row containing missing values or values outside the scale range\n(`geom_point()`).\n\n\n\n\n\n\n\n\n\nFigure 6. Scatterplot showing the relationship between whale mother-calf sightings and group size."
+  },
+  {
+    "objectID": "right_whale_website.html",
+    "href": "right_whale_website.html",
+    "title": "right_whale_code",
+    "section": "",
+    "text": "In this example project, I have taken the dataset “Right Whale Sightings Advisory System (RWSAS), from NOAA. This fishery program was designed to reduce ship collisions with critically endangered North Atlantic right whales. This dataset includes information on Whale ID, sighting date, group size, latitude, longitude, certainty on sighting, category of sighting, presence of whale mom and calf, and duplicates in the dataset."
+  },
+  {
+    "objectID": "right_whale_website.html#loading-in-library-and-csv",
+    "href": "right_whale_website.html#loading-in-library-and-csv",
+    "title": "right_whale_code",
+    "section": "Loading in library and CSV",
+    "text": "Loading in library and CSV\n\nlibrary(tidyverse)\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.1.4     ✔ readr     2.1.5\n✔ forcats   1.0.1     ✔ stringr   1.5.1\n✔ ggplot2   3.5.2     ✔ tibble    3.2.1\n✔ lubridate 1.9.4     ✔ tidyr     1.3.1\n✔ purrr     1.0.4     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nlibrary(lubridate)\n\nwhales &lt;- read.csv(\"~/Desktop/CSUMB/25-26/Spring 26/Stats 210 /Labs/Lab 2/tanya-yeung-portfolio/23305_RWSAS.csv\")"
+  },
+  {
+    "objectID": "right_whale_website.html#data-cleaning-1",
+    "href": "right_whale_website.html#data-cleaning-1",
+    "title": "right_whale_code",
+    "section": "Data cleaning",
+    "text": "Data cleaning\n\nwhales_clean &lt;- whales |&gt; \n  select(-DUPLICATE, -MOM_CALF) |&gt; \n  mutate(sighting = dmy(SIGHTINGDATE),\n         certainty = as.factor(CERTAINTY),\n         category = as.factor(CATEGORY)) |&gt; \n  select(-SIGHTINGDATE, -CERTAINTY, -CATEGORY) |&gt; \n  drop_na() |&gt; \n   arrange(sighting) |&gt; \n  filter(certainty == \"Definite\") |&gt; \n  mutate(\n    area = case_when(\n      LAT &gt; 40 ~ \"North\",\n      LAT &gt; 35 ~ \"Mid\",\n      TRUE ~ \"South\")) |&gt; \n  filter(!category == \"Unknown\")"
+  },
+  {
+    "objectID": "right_whale_website.html#pivoting-and-summarising-data",
+    "href": "right_whale_website.html#pivoting-and-summarising-data",
+    "title": "right_whale_code",
+    "section": "Pivoting and summarising data",
+    "text": "Pivoting and summarising data\n\npivot_whale &lt;- whales_clean |&gt; \n  group_by(category) |&gt; \n  summarise(mean_group = mean(GROUPSIZE, na.rm = TRUE),\n            count = n())\n\nggplot(pivot_whale, aes(reorder(category, count), count))+\n  geom_col()+\n  coord_flip()+\n  scale_y_log10()+\n  labs(\n    title = \"Number of whale sightings at different sighting types\",\n    y = \"Whale sighting numbers\",\n    x = \"Sighting types\"\n  )+ \n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 1. Bar graph shows the amount of right whale sightings at different sighting types."
+  },
+  {
+    "objectID": "right_whale_website.html#right-whale-sighting-by-area-graph",
+    "href": "right_whale_website.html#right-whale-sighting-by-area-graph",
+    "title": "right_whale_code",
+    "section": "Right whale sighting by area graph",
+    "text": "Right whale sighting by area graph\n\ndesired_order &lt;- c(\"North\", \"Mid\", \"South\")\nwhales_clean$area &lt;- factor(whales_clean$area, levels = desired_order)\n\narea_counts &lt;- whales_clean |&gt; \n  group_by(area) |&gt; \n  summarise(count = n())\n\nggplot(area_counts, aes(area, count, fill = area))+\n  geom_col()+\n  scale_y_log10()+\n  labs(\n    title = \"Right Whale sighting by area\",\n    x = \"Area\",\n    y = \"Number of sightings\"\n  )+\n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 2. Bar graph showing the number of right whale sightings in different areas, categorized by North (pink), Mid (green), and South (blue), based on the area."
+  },
+  {
+    "objectID": "right_whale_website.html#group-size-and-sighting-platform-graph",
+    "href": "right_whale_website.html#group-size-and-sighting-platform-graph",
+    "title": "right_whale_code",
+    "section": "Group size and sighting platform graph",
+    "text": "Group size and sighting platform graph\n\nggplot(whales_clean, aes(x = reorder(category, -GROUPSIZE), y = GROUPSIZE))+\n  geom_boxplot()+\n  coord_flip()+\n  scale_y_log10()+\n  labs(\n    title = \"Group sizes across sighting types\",\n    x = \"Sighting type\",\n    y = \"Whale group size\"\n  ) +\n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 3. Boxplot showing the whale group size seen at different sighting types."
+  },
+  {
+    "objectID": "right_whale_website.html#statistical-testing",
+    "href": "right_whale_website.html#statistical-testing",
+    "title": "right_whale_code",
+    "section": "Statistical testing",
+    "text": "Statistical testing\n\n\n               Df Sum Sq Mean Sq F value Pr(&gt;F)    \ncategory        7   7293  1041.9   36.49 &lt;2e-16 ***\nResiduals   12446 355314    28.5                   \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1"
+  },
+  {
+    "objectID": "right_whale_website.html#data-cleaning-for-mom-and-calf-sighting",
+    "href": "right_whale_website.html#data-cleaning-for-mom-and-calf-sighting",
+    "title": "right_whale_code",
+    "section": "Data cleaning for mom and calf sighting",
+    "text": "Data cleaning for mom and calf sighting\n\nmom_baby &lt;- whales |&gt; \n  select(-DUPLICATE, -CATEGORY) |&gt; \n  mutate(\n    SIGHTINGDATE = dmy(SIGHTINGDATE),\n    month = month(SIGHTINGDATE, label = TRUE),\n    season = case_when(\n      month %in% c(\"Mar\",\"Apr\",\"May\") ~ \"spring\",\n      month %in% c(\"Jun\", \"Jul\", \"Aug\") ~ \"summer\",\n      month %in% c(\"Sep\", \"Oct\", \"Nov\") ~ \"fall\",\n      month %in%  c(\"Dec\", \"Jan\", \"Feb\") ~ \"winter\"\n  )) |&gt; \n  mutate(\n    area = case_when(\n      LAT &gt; 40 ~ \"North\",\n      LAT &gt; 35 ~ \"Mid\",\n      TRUE ~ \"South\"\n    )\n  )\n\n\nbaby_area_count &lt;- mom_baby |&gt; \n  count(area, season)"
+  },
+  {
+    "objectID": "right_whale_website.html#mom-and-calf-sighting-graph",
+    "href": "right_whale_website.html#mom-and-calf-sighting-graph",
+    "title": "right_whale_code",
+    "section": "Mom and calf sighting graph",
+    "text": "Mom and calf sighting graph\n\ndesired_order &lt;- c(\"North\", \"Mid\", \"South\")\nbaby_area_count$area &lt;- factor(baby_area_count$area, levels = desired_order)\n\n\nggplot(baby_area_count, aes(season, n, fill = area))+\n  geom_col(position = \"dodge\")+\n  scale_y_log10()+\n  labs(\n    title = \"Whale mom and calf sighting in different areas\",\n    x = \"Season\",\n    y = \"Number of Sightings\"\n  )+\n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 4. Bargraph showing right whale mom and calf sightings throughout different seasons at different areas, categorized as North (pink), Mid (green), and South (blue)."
+  },
+  {
+    "objectID": "right_whale_website.html#mom-and-calf-sighting-graph-by-season-and-area",
+    "href": "right_whale_website.html#mom-and-calf-sighting-graph-by-season-and-area",
+    "title": "right_whale_code",
+    "section": "Mom and calf sighting graph by season and area",
+    "text": "Mom and calf sighting graph by season and area\n\nggplot(baby_area_count, aes(season, n, fill = season))+\n  geom_boxplot() + \n  scale_y_log10()+\n  labs(\n    title = \"Number of right whale mom and calfs sighted in different seasons\",\n    x = \"Season\",\n    y = \"Whale sightings (mom and calf)\"\n  ) +\n  theme_bw()\n\n\n\n\n\n\n\n\nFigure 5. Boxplot showing the number of sightings of whale mom and calf across all seasons."
+  },
+  {
+    "objectID": "right_whale_website.html#relationship-between-calf-and-group-size",
+    "href": "right_whale_website.html#relationship-between-calf-and-group-size",
+    "title": "right_whale_code",
+    "section": "Relationship between calf and group size",
+    "text": "Relationship between calf and group size\n\ngroup_baby &lt;- mom_baby |&gt; \n  count(MOM_CALF, GROUPSIZE) |&gt; \n  rename(count = n) |&gt; \n  filter(!count == 1967)\n\nggplot(group_baby, aes(GROUPSIZE, count))+\n  geom_point()+\n  geom_smooth(method = \"glm\", method.args = list(family = \"poisson\"))+\n  scale_x_log10()+\n  theme_bw()\n\n`geom_smooth()` using formula = 'y ~ x'\n\n\nWarning: Removed 1 row containing non-finite outside the scale range\n(`stat_smooth()`).\n\n\nWarning: Removed 1 row containing missing values or values outside the scale range\n(`geom_point()`).\n\n\n\n\n\n\n\n\n\nFigure 6. Scatterplot showing the relationship between whale mother-calf sightings and group size."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Tanya Yeung",
+    "section": "",
+    "text": "Tanya Yeung is a 3rd year Marine Science student major, Business minor student in California State University, Monterey Bay."
+  },
+  {
+    "objectID": "index.html#education",
+    "href": "index.html#education",
+    "title": "Tanya Yeung",
+    "section": "Education",
+    "text": "Education\nCSUMB 2023-Present San Domenico High School 2019-2023"
+  },
+  {
+    "objectID": "index.html#experience",
+    "href": "index.html#experience",
+    "title": "Tanya Yeung",
+    "section": "Experience",
+    "text": "Experience\nAdvize Production Intern | 2025-Present\nHKCIN Summer Intern | 2022"
+  },
+  {
+    "objectID": "portfolio_rightwhale.html",
+    "href": "portfolio_rightwhale.html",
+    "title": "Portfolio_RW",
+    "section": "",
+    "text": "Data Description\n\nIdentify your data source. &gt;The dataset “Right Whale Sightings Advisory System (RWSAS)”, Catalog Item ID 23305, is a NOAA Fisheries program designed to reduce ship collisions with critically endangered North Atlantic right whales.\nDescribe your data, including variables and data types. &gt; This dataset included information on, ID, sighting date, group size, latitiude, longtitude, certainty, category, presence of mom calf, and duplicates.\nIdentify the research questions you want to answer. &gt; RQ: Where are the North Atlantic Right Whales most frequently seen and does group size vary across sighting types?\n\n\n\nData Visualization\n\nWhat do you want your final visualizations to look like? &gt; For the final visualization, I would like to have a boxplot that shows where the North Atlantic Right Whales are most frequently seen, by grouping the lattitude and longtitudes into different groups, and then another boxplot to see the variation of group sizes different varied from different sighting types.\nWhat do you want to highlight on your final visualizations in order to answer your research questions? How do you plan to do that? &gt;Something I want to highlight on my final visualization is to which area has the most sighting of Right Whales, which will help answer a part of the research question, and which sighting types can are shown to be able to observe the biggest group size.\nWhat is missing from your data or would need to change in your data to create these visualizations? &gt;I need to group the lat and long into different groups/areas, in order to create different areas for us to differientiate.\n\n\n\nData Cleaning\nThe answer to at least three of these questions should be “YES” for the data to meet the necessary standards to demonstrate your cleaning. Your data source should not be an already perfectly prepared data set.\n\nDo you need to reformat any variables into different types (e.g. factors, time, dates, strings)? Or remove information from variable values? &gt; Yes, I will remove duplicate and mom_calf off the dataset I will be working with\nDo you need to deal with any missing data, especially missing data coded other than NA? &gt; Yes and no..? There is a lot of missing data for duplicate, I have to either put them as NA or to filter it out the data\nDo you need to filter your data? How? &gt; Yes, I might need to filter out the duplicate and the mother calf column since I do not need those data for the research question I came up with\nDo you need to create any new variables? What variables? How? &gt; Yes, I will create new variables in order to group the latitude and longtitudes into different areas\nDo you need to add new data (join) to your data? What data? How? &gt; No\nDo you need pivot your data in any way? Why? How? &gt; Yes, I will need to pivot my data for the group size with the category (sighting types)\nDo you need to summarize any of the variables? Which ones? How? &gt; Yes, I will find the mean of each “area” that I create to better visluaize on a line plot/scatterplot\nWhat other aspects of your data need to be “fixed” in order to make your data visualizations? &gt; Not I can think of in the moment.\n\nMost will answer yes to the following for making your programming more efficient using select(), but you should have three other yeses above.\n\nAre there any variables you can exclude from your data? &gt; mom_calf and duplicate and certainty"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About Me",
+    "section": "",
+    "text": "Tanya Yeung is a student with a strong interest in marine science, focusing on understanding how organisms interact with their environments. Her academic work emphasizes observational and experimental approaches in ecology, data analysis, and science communication. Through coursework, independent projects, and field-related experiences, she has developed skills in critical thinking, research design, and translating scientific findings for broader audiences."
+  },
+  {
+    "objectID": "Untitled.html",
+    "href": "Untitled.html",
+    "title": "Right whale sightings project",
+    "section": "",
+    "text": "In this example project, I have taken the dataset “Right Whale Sightings Advisory System (RWSAS), from NOAA. This fishery program was designed to reduce ship collisions with critically endangered North Atlantic right whales. This dataset includes information on Whale ID, sighting date, group size, latitude, longitude, certainty on sighting, category of sighting, presence of whale mom and calf, and duplicates in the dataset."
+  },
+  {
+    "objectID": "Untitled.html#number-of-whale-sighting-at-different-observation-platforms-1",
+    "href": "Untitled.html#number-of-whale-sighting-at-different-observation-platforms-1",
+    "title": "Right whale sightings project",
+    "section": "Number of whale sighting at different observation platforms",
+    "text": "Number of whale sighting at different observation platforms\n Figure 1. Bar graph shows the amount of right whale sightings at different sighting types."
+  },
+  {
+    "objectID": "Untitled.html#number-of-whale-sighting-in-each-area-1",
+    "href": "Untitled.html#number-of-whale-sighting-in-each-area-1",
+    "title": "Right whale sightings project",
+    "section": "Number of whale sighting in each area",
+    "text": "Number of whale sighting in each area\n Figure 2. Bar graph showing the number of right whale sightings in different areas, categorized by North (pink), Mid (green), and South (blue), based on the area."
+  },
+  {
+    "objectID": "Untitled.html#group-size-across-sighting-types-1",
+    "href": "Untitled.html#group-size-across-sighting-types-1",
+    "title": "Right whale sightings project",
+    "section": "Group size across sighting types",
+    "text": "Group size across sighting types\n Figure 3. Boxplot showing the whale group size seen at different sighting types."
+  },
+  {
+    "objectID": "Untitled.html#whale-mom-and-calf-sightings-1",
+    "href": "Untitled.html#whale-mom-and-calf-sightings-1",
+    "title": "Right whale sightings project",
+    "section": "Whale mom and calf sightings",
+    "text": "Whale mom and calf sightings\n Figure 4. Bargraph showing right whale mom and calf sightings throughout different seasons at different areas, categorized as North (pink), Mid (green), and South (blue)."
+  },
+  {
+    "objectID": "Untitled.html#relationship-between-mother-calf-sightings-and-group-size-1",
+    "href": "Untitled.html#relationship-between-mother-calf-sightings-and-group-size-1",
+    "title": "Right whale sightings project",
+    "section": "Relationship between mother-calf sightings and group size",
+    "text": "Relationship between mother-calf sightings and group size\n Figure 5. Boxplot showing the number of sightings of whale mom and calf across all seasons."
+  },
+  {
+    "objectID": "Untitled.html#relationship-between-mother-calf-sightings-and-group-size-2",
+    "href": "Untitled.html#relationship-between-mother-calf-sightings-and-group-size-2",
+    "title": "Right whale sightings project",
+    "section": "Relationship between mother-calf sightings and group size",
+    "text": "Relationship between mother-calf sightings and group size\n Figure 6. Scatterplot showing the relationship between whale mother-calf sightings and group size."
+  }
+]
